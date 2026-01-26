@@ -6,20 +6,17 @@ BLANK = 0
 NUM_CLASSES = len(CHARS) + 1
 
 def ctc_greedy_decode(preds):
-    """
-    preds: (T, B, C) after log_softmax
-    """
-    preds = preds.argmax(dim=2)  # (T, B)
-    preds = preds.permute(1, 0)  # (B, T)
+    preds = preds.argmax(2)
+    results = []
 
-    texts = []
-    for seq in preds:
+    for i in range(preds.shape[1]):
         prev = -1
-        s = ""
-        for idx in seq:
-            idx = idx.item()
-            if idx != prev and idx != 0:
-                s += idx2char[idx]
-            prev = idx
-        texts.append(s)
-    return texts
+        text = ""
+        for t in preds[:, i]:
+            t = t.item()
+            if t != prev and t != 0:
+                text += idx2char[t]
+            prev = t
+        results.append(text)
+
+    return results
